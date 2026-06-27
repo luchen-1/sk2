@@ -530,8 +530,6 @@ HTML = r"""<!doctype html>
     });
 
     document.getElementById("latestReportBtn").addEventListener("click", async () => {
-
-    document.getElementById("latestReportBtn").addEventListener("click", async () => {
       const report = document.getElementById("latestReport");
       try {
         const result = await fetchJson("/api/latest-report");

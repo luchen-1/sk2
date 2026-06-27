@@ -54,6 +54,7 @@ def write_release_readme() -> None:
 ## 注意
 
 - 不需要安装 Python。
+- 不要打开 `.spec` 文件，它只是打包配置，不是启动程序。
 - 不要删除 `products.xlsx`。
 - 不要把填写后的 `.env` 发给别人。
 - 数据库、报告、备份和截图会保存在当前文件夹中。
