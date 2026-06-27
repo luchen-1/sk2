@@ -13,12 +13,12 @@
 如果客户不懂 Python，优先下载仓库里的：
 
 ```text
-release/护肤品价格助手-windows.zip
+release/skincare-price-helper-windows.zip
 ```
 
 使用方式：
 
-1. 解压整个 `护肤品价格助手-windows.zip` 文件夹，不要只复制或拖出一个 exe。
+1. 解压整个 `skincare-price-helper-windows.zip` 文件夹，不要只复制或拖出一个 exe。
 2. 双击 `护肤品价格助手.exe`。
 3. 浏览器会自动打开本地控制台。
 4. 使用期间不要关闭 exe 弹出的窗口；关闭后网页还在，但按钮会提示无法连接本地服务。

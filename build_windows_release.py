@@ -12,7 +12,7 @@ DIST_DIR = ROOT / "dist"
 BUILD_DIR = ROOT / "build"
 RELEASE_DIR = ROOT / "release"
 PACKAGE_DIR = RELEASE_DIR / f"{APP_NAME}-windows"
-ZIP_PATH = RELEASE_DIR / f"{APP_NAME}-windows.zip"
+ZIP_PATH = RELEASE_DIR / "skincare-price-helper-windows.zip"
 
 
 def run(command: list[str]) -> None:
@@ -45,7 +45,7 @@ def write_release_readme() -> None:
 
 ## 使用方法
 
-1. 先解压整个 `护肤品价格助手-windows.zip` 文件夹，不要只拖出一个 exe。
+1. 先解压整个 `skincare-price-helper-windows.zip` 文件夹，不要只拖出一个 exe。
 2. 双击 `护肤品价格助手.exe`。
 3. 浏览器会自动打开本地控制台：`http://127.0.0.1:8765/`。
 4. 使用期间不要关闭 exe 弹出的窗口；关闭后网页还在，但按钮会无法连接本地服务。
