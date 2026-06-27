@@ -411,25 +411,58 @@ HTML = r"""<!doctype html>
     }
 
     async function loadStatus() {
-      const data = await fetchJson("/api/status");
-      renderStatus(data.status || {});
+      try {
+        const data = await fetchJson("/api/status");
+        renderStatus(data.status || {});
+        return { ok: true };
+      } catch (error) {
+        renderStatus({
+          total_products: "--",
+          today_collected: "--",
+          meets_target: "--",
+          today_alerted: "--",
+          email_config_ok: false,
+          email_config_status: "加载失败"
+        });
+        return { ok: false, name: "状态卡片", message: error.message };
+      }
     }
 
     async function loadProducts() {
-      const data = await fetchJson("/api/products");
-      products = data.products || [];
-      renderProductSelect();
+      try {
+        const data = await fetchJson("/api/products");
+        products = data.products || [];
+        renderProductSelect();
+        return { ok: true };
+      } catch (error) {
+        products = [];
+        const select = document.getElementById("productSelect");
+        select.innerHTML = '<option value="">商品列表加载失败</option>';
+        document.getElementById("productInfo").innerHTML = `<div>错误</div><div>${escapeHtml(error.message)}</div>`;
+        return { ok: false, name: "商品列表", message: error.message };
+      }
     }
 
     async function loadRecent() {
-      const data = await fetchJson("/api/recent");
-      renderRecent(data.records || []);
+      try {
+        const data = await fetchJson("/api/recent");
+        renderRecent(data.records || []);
+        return { ok: true };
+      } catch (error) {
+        renderRecent([]);
+        return { ok: false, name: "最近记录", message: error.message };
+      }
     }
 
     async function refreshAll() {
-      await loadStatus();
-      await loadProducts();
-      await loadRecent();
+      const results = await Promise.all([loadStatus(), loadProducts(), loadRecent()]);
+      const failures = results.filter((item) => !item.ok);
+      const status = document.getElementById("actionStatus");
+      if (failures.length) {
+        status.textContent = `部分数据加载失败：${failures.map((item) => `${item.name} ${item.message}`).join("；")}`;
+      } else if (status.textContent.startsWith("初始化失败") || status.textContent.startsWith("部分数据加载失败")) {
+        status.textContent = "";
+      }
     }
 
     document.getElementById("platformFilter").addEventListener("change", renderProductSelect);
@@ -548,9 +581,7 @@ HTML = r"""<!doctype html>
       }
     });
 
-    refreshAll().catch((error) => {
-      document.getElementById("actionStatus").textContent = `初始化失败：${error.message}`;
-    });
+    refreshAll();
   </script>
 </body>
 </html>
