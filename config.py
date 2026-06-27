@@ -4,7 +4,13 @@ import sys
 from pathlib import Path
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+def runtime_root() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent
+
+
+PROJECT_ROOT = runtime_root()
 PRODUCTS_PATH = PROJECT_ROOT / "products.xlsx"
 REPORTS_DIR = PROJECT_ROOT / "reports"
 SCREENSHOTS_DIR = PROJECT_ROOT / "screenshots"

@@ -9,7 +9,7 @@ from zipfile import ZipFile
 
 import pandas as pd
 
-from config import PRODUCTS_PATH, SUPPORTED_PLATFORMS
+from config import PRODUCTS_PATH, PROJECT_ROOT, SUPPORTED_PLATFORMS
 
 
 REQUIRED_COLUMNS = ["platform", "name", "url", "target_price"]
@@ -56,6 +56,10 @@ def find_product_file(path: str | Path | None = None) -> Path:
     candidate = Path(path) if path else PRODUCTS_PATH
     if candidate.exists():
         return candidate
+    if path and not candidate.is_absolute():
+        project_candidate = PROJECT_ROOT / candidate
+        if project_candidate.exists():
+            return project_candidate
     raise FileNotFoundError(f"Product file not found: {candidate}")
 
 

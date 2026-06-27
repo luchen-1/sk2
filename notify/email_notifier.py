@@ -9,10 +9,11 @@ from email.message import EmailMessage
 from pathlib import Path
 from urllib.parse import urlparse
 
+from config import PROJECT_ROOT
 from storage.db import get_connection, init_db, mark_alert_sent, mark_price_history_alert_sent, was_alert_sent
 
 
-ENV_PATH = Path(".env")
+ENV_PATH = PROJECT_ROOT / ".env"
 
 
 @dataclass(frozen=True)

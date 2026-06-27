@@ -17,3 +17,8 @@ reports/
 backups/
 external_research/
 legacy_playwright/
+build/
+dist/
+release/*
+!release/*.zip
+*.spec
