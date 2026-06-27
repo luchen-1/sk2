@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>护肤品价格采集助手</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>护肤品价格采集助手</h1>
+      <section class="page-info">
+        <div class="label">当前页面</div>
+        <div id="pageUrl" class="url">读取中...</div>
+      </section>
+
+      <button id="readPage" class="primary">读取当前页</button>
+
+      <section>
+        <div class="section-title">价格候选</div>
+        <div id="candidates" class="candidates empty">尚未读取</div>
+      </section>
+
+      <label>
+        手动确认到手价 / 券后价
+        <input id="manualPrice" type="number" min="0" step="0.01" placeholder="例如 820" />
+      </label>
+
+      <label>
+        价格来源
+        <select id="priceSource">
+          <option value="手动确认价">手动确认价</option>
+          <option value="页面明确券后价/到手价">页面明确券后价/到手价</option>
+          <option value="根据优惠估算价">根据优惠估算价</option>
+          <option value="普通页面价">普通页面价</option>
+        </select>
+      </label>
+
+      <button id="submitData" class="primary">提交到本地服务</button>
+
+      <section>
+        <div class="section-title">本地服务返回</div>
+        <pre id="result" class="result">等待提交</pre>
+      </section>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
