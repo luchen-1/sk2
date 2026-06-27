@@ -5,8 +5,9 @@ import threading
 import time
 import webbrowser
 from pathlib import Path
+from urllib.request import urlopen
 
-from config import PROJECT_ROOT, configure_console, ensure_runtime_dirs
+from config import BUNDLED_ROOT, PROJECT_ROOT, configure_console, ensure_runtime_dirs
 from dashboard import HOST, PORT, run_server
 
 
@@ -24,16 +25,27 @@ def ensure_env_template() -> None:
     if env_path.exists():
         return
     example_path = PROJECT_ROOT / ".env.example"
+    bundled_example_path = BUNDLED_ROOT / ".env.example"
     if example_path.exists():
         shutil.copy2(example_path, env_path)
+    elif bundled_example_path.exists():
+        shutil.copy2(bundled_example_path, env_path)
     else:
         env_path.write_text(ENV_TEMPLATE, encoding="utf-8")
     print("已创建 .env 模板。请用记事本填写邮箱配置后，再在网页里测试邮件。")
 
 
 def open_browser_later() -> None:
-    time.sleep(1.0)
-    webbrowser.open(f"http://{HOST}:{PORT}/")
+    url = f"http://{HOST}:{PORT}/"
+    health_url = f"{url}health"
+    for _ in range(60):
+        try:
+            with urlopen(health_url, timeout=1) as response:
+                if response.status == 200:
+                    break
+        except Exception:
+            time.sleep(0.25)
+    webbrowser.open(url)
 
 
 def main() -> None:

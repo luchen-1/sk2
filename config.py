@@ -10,8 +10,25 @@ def runtime_root() -> Path:
     return Path(__file__).resolve().parent
 
 
+def bundled_root() -> Path:
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS).resolve()
+    return Path(__file__).resolve().parent
+
+
+def resource_path(name: str) -> Path:
+    external = PROJECT_ROOT / name
+    if external.exists():
+        return external
+    bundled = BUNDLED_ROOT / name
+    if bundled.exists():
+        return bundled
+    return external
+
+
 PROJECT_ROOT = runtime_root()
-PRODUCTS_PATH = PROJECT_ROOT / "products.xlsx"
+BUNDLED_ROOT = bundled_root()
+PRODUCTS_PATH = resource_path("products.xlsx")
 REPORTS_DIR = PROJECT_ROOT / "reports"
 SCREENSHOTS_DIR = PROJECT_ROOT / "screenshots"
 BACKUPS_DIR = PROJECT_ROOT / "backups"

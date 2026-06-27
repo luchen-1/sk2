@@ -404,8 +404,18 @@ HTML = r"""<!doctype html>
     }
 
     async function fetchJson(url, options) {
-      const response = await fetch(url, options);
-      const data = await response.json();
+      let response;
+      try {
+        response = await fetch(url, options);
+      } catch (error) {
+        throw new Error("无法连接本地服务。请确认“护肤品价格助手.exe”或启动窗口仍在运行，并且当前网页地址是 http://127.0.0.1:8765/");
+      }
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        throw new Error("本地服务返回异常，请重启价格助手后再试。");
+      }
       if (!response.ok) throw new Error(data.message || data.failure_reason || "请求失败");
       return data;
     }
