@@ -53,7 +53,25 @@ def to_float(value: object) -> float | None:
     try:
         if value is None or value == "":
             return None
-        number = float(str(value).replace(",", "").strip())
+        if isinstance(value, (int, float)):
+            number = float(value)
+        else:
+            text = str(value).strip()
+            text = "".join(
+                str(ord(char) - ord("０")) if "０" <= char <= "９" else char
+                for char in text
+            )
+            text = text.replace("￥", "").replace("¥", "").replace("元", "").replace(" ", "")
+            text = text.replace("。", ".").replace("，", ",")
+            if "," in text and "." not in text:
+                parts = text.split(",")
+                text = f"{parts[0]}.{parts[1]}" if len(parts) == 2 and len(parts[1]) <= 2 else text.replace(",", "")
+            else:
+                text = text.replace(",", "")
+            match = re.search(r"\d+(?:\.\d+)?", text)
+            if not match:
+                return None
+            number = float(match.group(0))
     except (TypeError, ValueError):
         return None
     return number if 0.01 < number <= 20000 else None

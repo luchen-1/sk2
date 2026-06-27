@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from config import BACKUPS_DIR, PRICE_HISTORY_DB, PRODUCTS_PATH, REPORTS_DIR, configure_console, ensure_runtime_dirs
+from config import APP_VERSION, BACKUPS_DIR, PRICE_HISTORY_DB, PRODUCTS_PATH, PROJECT_ROOT, REPORTS_DIR, configure_console, ensure_runtime_dirs
 from local_collector import handle_collect, is_promo_period
 from main import generate_report_no_email, send_alerts_and_generate_report
 from notify.email_notifier import annotate_email_decisions, send_test_email
@@ -143,6 +143,7 @@ HTML = r"""<!doctype html>
   <header>
     <h1>护肤品价格监控助手</h1>
     <p>本地录入淘宝/抖音真实到手价，统一生成报告和发送提醒。</p>
+    <p class="muted">版本：<span id="appVersion">加载中</span></p>
   </header>
 
   <main>
@@ -178,7 +179,7 @@ HTML = r"""<!doctype html>
       <div class="card">
         <h2>手动录入</h2>
         <label>当前真实到手价 / 券后价
-          <input id="manualPrice" type="number" step="0.01" min="0" placeholder="例如 119.42" />
+          <input id="manualPrice" type="text" inputmode="decimal" placeholder="例如 119.42 / ¥119.42 / 119.42元" />
         </label>
         <label>价格来源
           <select id="priceSource">
@@ -270,6 +271,26 @@ HTML = r"""<!doctype html>
       return Number.isFinite(number) ? `${number.toFixed(2)} 元` : String(value);
     }
 
+    function normalizeFullWidth(text) {
+      return String(text || "").replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xFEE0));
+    }
+
+    function parsePriceInput(value) {
+      let text = normalizeFullWidth(value)
+        .replace(/[￥¥元\s]/g, "")
+        .replace(/。/g, ".")
+        .replace(/，/g, ",")
+        .trim();
+      if (text.includes(",") && !text.includes(".")) {
+        const parts = text.split(",");
+        text = parts.length === 2 && parts[1].length <= 2 ? `${parts[0]}.${parts[1]}` : text.replace(/,/g, "");
+      } else {
+        text = text.replace(/,/g, "");
+      }
+      const match = text.match(/\d+(?:\.\d+)?/);
+      return match ? Number(match[0]) : NaN;
+    }
+
     function yesNo(value) {
       return value ? "是" : "否";
     }
@@ -295,6 +316,7 @@ HTML = r"""<!doctype html>
     }
 
     function renderStatus(status) {
+      document.getElementById("appVersion").textContent = status.app_version || "--";
       const cards = document.getElementById("statusCards");
       const emailClass = status.email_config_ok ? "hit" : "warn";
       cards.innerHTML = `
@@ -481,9 +503,9 @@ HTML = r"""<!doctype html>
 
     document.getElementById("saveBtn").addEventListener("click", async () => {
       const item = currentProduct();
-      const price = Number(document.getElementById("manualPrice").value);
+      const price = parsePriceInput(document.getElementById("manualPrice").value);
       if (!item) return renderSaveResult({ ok: false, message: "请先选择商品" });
-      if (!Number.isFinite(price) || price <= 0) return renderSaveResult({ ok: false, message: "请输入有效价格" });
+      if (!Number.isFinite(price) || price <= 0) return renderSaveResult({ ok: false, message: "请输入有效价格，例如 119.42、¥119.42 或 119.42元。" });
       try {
         const result = await fetchJson("/api/manual-collect", {
           method: "POST",
@@ -684,6 +706,7 @@ def status_payload() -> dict[str, Any]:
         {
             "ok": True,
             "status": {
+                "app_version": APP_VERSION,
                 "total_products": len(products),
                 "today_collected": today_collected_count(),
                 "meets_target": sum(1 for record in records if record.get("meets_target_price")),
@@ -932,6 +955,14 @@ def email_check() -> dict[str, Any]:
     return {"name": "邮件配置", "ok": status["ok"], "message": status["message"]}
 
 
+def runtime_check() -> dict[str, Any]:
+    return {
+        "name": "程序版本",
+        "ok": True,
+        "message": f"版本 {APP_VERSION}；运行目录 {PROJECT_ROOT}；商品文件 {PRODUCTS_PATH}",
+    }
+
+
 def report_generation_check() -> dict[str, Any]:
     try:
         result = generate_report_no_email()
@@ -941,7 +972,7 @@ def report_generation_check() -> dict[str, Any]:
 
 
 def self_check_payload() -> dict[str, Any]:
-    checks = [product_check(), email_check(), database_check(), reports_dir_check(), report_generation_check()]
+    checks = [runtime_check(), product_check(), email_check(), database_check(), reports_dir_check(), report_generation_check()]
     return {"ok": all(check["ok"] for check in checks), "checks": checks}
 
 

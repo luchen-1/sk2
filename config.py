@@ -28,6 +28,7 @@ def resource_path(name: str) -> Path:
 
 PROJECT_ROOT = runtime_root()
 BUNDLED_ROOT = bundled_root()
+APP_VERSION = "2026.06.27.4"
 PRODUCTS_PATH = resource_path("products.xlsx")
 REPORTS_DIR = PROJECT_ROOT / "reports"
 SCREENSHOTS_DIR = PROJECT_ROOT / "screenshots"
